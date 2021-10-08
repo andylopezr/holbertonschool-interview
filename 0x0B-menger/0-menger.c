@@ -2,9 +2,8 @@
 #include <stdio.h>
 #include <math.h>
 
-
 /**
- * checkForBlank - Checks for blank
+ * checkForBlank - Draws a 2D Menger sponge
  * @i: row
  * @j: column
  *
@@ -20,7 +19,6 @@ int checkForBlank(int i, int j)
 
 		i /= 3;
 		j /= 3;
-
 	}
 	return (1);
 }
@@ -42,7 +40,7 @@ void menger(int level)
 	for (index = 0, max = pow(3, level); index < max; index++)
 	{
 		for (j = 0; j < max; j++)
-			if(checkForBlank(index, j))
+			if (checkForBlank(index, j))
 				printf("%c", '#');
 			else
 				printf("%c", ' ');
