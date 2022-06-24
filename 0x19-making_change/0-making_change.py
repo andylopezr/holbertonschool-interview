@@ -1,27 +1,25 @@
 #!/usr/bin/python3
 """
-Main file for testing
+Given a pile of coins of different values, determine the fewest
+number of coins needed to meet a given amount total.
 """
 
 
 def makeChange(coins, total):
-    """[summary]
-
-    Args:
-        coins ([type]): [description]
-        total ([type]): [description]
-
-    Returns:
-        [type]: [description]
     """
-    coinsCombination = 0
-    if total <= 0:
+    Determines the fewest
+    number of coins needed to meet a given amount total.
+    """
+    sum = 0
+    if (total <= 0):
         return 0
-    coins.sort()
-    coins.reverse()
-    for c in coins:
-        coinsCombination += total // c
-        total = total % c
+    coins.sort(reverse=True)
+    for i in coins:
+        if (total < i):
+            pass
+        q, r = divmod(total, i)
+        total = r
+        sum += q
     if (total != 0):
         return -1
-    return coinsCombination
+    return sum
