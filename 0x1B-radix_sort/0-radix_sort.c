@@ -4,7 +4,7 @@
  * getMaximum - find the maximum digit of an array
  *
  * @array: array of integers
- * @size: size of the array.
+ * @size: size of the array
  *
  * Return: the biggest element of the array.
  */
