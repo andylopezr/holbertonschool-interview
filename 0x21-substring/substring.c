@@ -1,92 +1,121 @@
 #include "substring.h"
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-
 /**
- * find_substring - Finds all the possible substrings containing a list of
- *   words within a given string. A valid substring of `s` is the concatenation
- *   of each word in `words` exactly once and without any intervening
- *   characters
- *
- * @s: string to scan
- * @words: array of words all substrings must be a concatenation of to be
- *   valid; all words in this array are the same length
- * @nb_words: number of elements in the array words
- * @n: holds the address at which to store the number of elements in the
- *   returned array.
- *
- * Return: an allocated array storing each index in s at which a substring was
- *   found, or NULL on failure
- */
+ * cmp_values - Function that compare two values
+ * @a: first value
+ * @b: second value
+ * Return: substraction
+ **/
+int cmp_values(const void *a, const void *b)
+{
+	return (*(int *)a - *(int *)b);
+}
+/**
+ * check_words - Function that chek if all words are continous
+ * @aux_indx: array with index for ever word
+ * @wordlen: word size
+ * @idx_len: aux_indx size
+ * Return: index firt word or zero
+ **/
+int check_words(int *aux_indx, int wordlen, int idx_len)
+{
+	int i;
 
+	for (i = 0; i < idx_len - 1; i++)
+	{
+		if (aux_indx[i + 1] - aux_indx[i] != wordlen)
+			return (0);
+	}
+	return (1);
+}
+/**
+ * search_word - Function that search words in string
+ * @s: string base
+ * @words: array of words to search in the string
+ * @nb_words: number of words
+ * Return: array with size of substring for every word, otherwise NULL
+ **/
+int *search_word(char const *s, char const **words, int nb_words)
+{
+	int *aux_indx, i, j;
+	char *aux;
+	int len;
+
+	aux_indx = malloc((sizeof(int) * nb_words));
+	if (!aux_indx)
+		return (NULL);
+	for (i = 0; i < nb_words; i++)
+	{
+		aux = strstr(s, words[i]);
+		if (!aux)
+		{
+			free(aux_indx);
+			return (NULL);
+		}
+		len = (int)strlen(aux);
+		for (j = 0; j < i; j++)
+		{
+			if (len == aux_indx[j])
+			{
+				aux = strstr(s + (int)strlen(s) - len + 1, words[i]);
+				if (!aux)
+				{
+					free(aux_indx);
+					return (NULL);
+				}
+				len = (int)strlen(aux);
+				aux_indx[i] = len;
+				continue;
+			}
+		}
+		aux_indx[i] = len;
+	}
+	return (aux_indx);
+}
+/**
+ * find_substring - Function that search_word words in string
+ * @s: string base
+ * @words: array of words to searh in the string
+ * @nb_words: number of words
+ * @n: return size
+ * Return: array with index for every word or NULL
+ *
+ **/
 int *find_substring(char const *s, char const **words, int nb_words, int *n)
 {
-	int *matched_word, *indices;
-	int i, j, k, l, _n, s_len, word_len, any_word_match, substr_match;
-	int _indices[50] = {-1};
+	int *indx, *aux_indx, wordlen, j, diff, s_len, f_indx, tmp;
 
-	if (!s || !words || !*words || !n)
+	*n = 0;
+	wordlen = (int)strlen(words[0]);
+	s_len = (int)strlen(s);
+	for (j = 0; j < s_len; j++)
 	{
-		fprintf(stderr, "find_substring: NULL parameter(s)\n");
-		return (NULL);
-	}
-
-	s_len = strlen(s);
-	word_len = strlen(words[0]);
-	matched_word = malloc(nb_words * sizeof(int));
-	if (!matched_word)
-	{
-		fprintf(stderr, "find_substring: malloc failure\n");
-		return (NULL);
-	}
-
-	for (i = 0, k = 0, _n = 0; i < s_len;)
-	{
-		substr_match = 0;
-		bzero(matched_word, nb_words * sizeof(int));
-		l = i;
-		do {
-			for (j = 0, any_word_match = 0; j < nb_words; j++)
-			{
-				if (!matched_word[j])
-				{
-					if (strncmp(words[j],
-						    s + l, word_len) == 0)
-					{
-						any_word_match = 1;
-						matched_word[j] = 1;
-						l += word_len;
-					}
-				}
-			}
-		} while (any_word_match);
-
-		for (j = 0, substr_match = 1; j < nb_words; j++)
-			substr_match &= matched_word[j];
-
-		if (substr_match)
+		aux_indx = search_word(s, words, nb_words);
+		if (!aux_indx)
+			break;
+		qsort(aux_indx, nb_words, sizeof(int), cmp_values);
+		f_indx = check_words(aux_indx, wordlen, nb_words);
+		tmp = aux_indx[nb_words - 1];
+		free(aux_indx);
+		if (f_indx == 1)
 		{
-			_n++;
-			_indices[k] = i;
-			k++;
-			i += word_len;
+			diff = s_len - tmp;
+			if (*n == 0 || diff != indx[*n - 1])
+			{
+				if (*n == 0)
+				{
+					indx = malloc((sizeof(int)));
+					if (!indx)
+						return (NULL);
+				}
+				else
+					indx = realloc(indx, sizeof(int) * (*n + 1));
+				indx[*n] = diff;
+				*n += 1;
+			}
 		}
-		else
-			i++;
+		s++;
 	}
-	free(matched_word);
-
-	indices = malloc(_n * sizeof(int));
-	if (!indices)
-	{
-		fprintf(stderr, "find_substring: malloc failure\n");
+	if (*n == 0)
 		return (NULL);
-	}
-	for (k = 0; k < _n; k++)
-		indices[k] = _indices[k];
-
-	*n = _n;
-	return (indices);
+	return (indx);
 }
